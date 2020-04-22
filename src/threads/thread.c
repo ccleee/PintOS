@@ -581,6 +581,14 @@ allocate_tid (void)
 
   return tid;
 }
+void block_check(struct thread *t, void *aux UNUSED){
+    if(t->status == THREAD_BLOCKED && t->block_ticks > 0){
+        t->block_ticks--;
+        if(t->block_ticks == 0){
+            thread_unblock(t);
+        }
+    }
+}
 
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
