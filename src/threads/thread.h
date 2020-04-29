@@ -80,6 +80,10 @@ typedef int tid_t;
    only because they are mutually exclusive: only a thread in the
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
+struct pri_stack{
+    int priority;
+    struct lock *lock;
+};
 struct thread
   {
     /* Owned by thread.c. */
@@ -99,7 +103,11 @@ struct thread
 #endif
 
     /* Owned by thread.c. */
-    unsigned magic;                     /* Detects stack overflow. */
+    unsigned magic;  /* Detects stack overflow. */
+    struct pri_stack pri[64];
+    int top;
+    struct semaphore *block_sema;
+    struct lock *block_lock;
   };
 
 /* If false (default), use round-robin scheduler.
@@ -140,3 +148,6 @@ int thread_get_load_avg (void);
 
 void block_check(struct thread *t, void *aux UNUSED);
 #endif /* threads/thread.h */
+
+bool pri_more(const struct list_elem *a,const struct list_elem *b,void *aux UNUSED);
+void priority_donate(struct thread *t,struct lock *lock);
